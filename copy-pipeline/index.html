@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Copy Machine — How an Ad Gets Written</title>
+<meta name="description" content="A plain-language map of the Exodus copy pipeline, built so Luke can mark where humans should step in." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,500;1,9..144,800&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5efe2;
+    --paper-deep:#ece3cd;
+    --ink:#23262e;
+    --ink-soft:#4c4f58;
+    --rule:#cfc2a4;
+    --teal:#1e6f62;        /* people + local Claude */
+    --teal-soft:#dcebe5;
+    --indigo:#46529a;      /* cloud scripts */
+    --indigo-soft:#dfe2f0;
+    --rust:#b04a1f;        /* genesis bots */
+    --rust-soft:#f3ddd0;
+    --bronze:#85702f;      /* database */
+    --bronze-soft:#ece2c4;
+    --caution:#e9b50b;     /* gates */
+    --max:1060px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Spline Sans",sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* paper grain + faint drafting grid */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+      linear-gradient(var(--rule) 1px, transparent 1px),
+      linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+    background-size:160px 160px, 56px 56px, 56px 56px;
+    opacity:.5;
+  }
+  main{position:relative;z-index:1}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 28px}
+
+  ::selection{background:var(--caution);color:var(--ink)}
+
+  h1,h2,h3{font-family:"Fraunces",serif}
+  .mono{font-family:"Spline Sans Mono",monospace}
+
+  /* ---------- header ---------- */
+  header{padding:64px 0 24px;border-bottom:3px solid var(--ink)}
+  .kicker{
+    font-family:"Spline Sans Mono",monospace;font-size:12.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-soft);display:flex;gap:14px;flex-wrap:wrap;align-items:center;
+  }
+  .kicker .dot{width:8px;height:8px;background:var(--rust);border-radius:50%;display:inline-block}
+  h1{
+    font-size:clamp(44px,7.2vw,86px);font-weight:900;line-height:.98;
+    letter-spacing:-.015em;margin:22px 0 18px;max-width:14ch;
+  }
+  h1 em{font-style:italic;font-weight:500;color:var(--rust)}
+  .lede{font-size:clamp(18px,2.2vw,21px);color:var(--ink-soft);max-width:62ch}
+  .lede strong{color:var(--ink)}
+  .header-meta{
+    margin-top:28px;display:flex;gap:0;flex-wrap:wrap;border-top:1px solid var(--rule);
+  }
+  .header-meta div{
+    font-family:"Spline Sans Mono",monospace;font-size:12.5px;padding:10px 22px 0 0;
+    margin-right:22px;color:var(--ink-soft);
+  }
+  .header-meta b{color:var(--ink);font-weight:600}
+
+  /* ---------- legend ---------- */
+  .legend{padding:26px 0;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:"Spline Sans Mono",monospace;font-size:12.5px;font-weight:500;
+    padding:7px 14px;border:1.5px solid var(--ink);border-radius:999px;background:#fffdf6;
+  }
+  .chip i{width:11px;height:11px;border-radius:3px;display:inline-block;flex:none}
+  .chip.c-human i{background:var(--teal)}
+  .chip.c-cloud i{background:var(--indigo)}
+  .chip.c-bot i{background:var(--rust)}
+  .chip.c-db i{background:var(--bronze)}
+  .chip.c-gate{border-style:dashed}
+  .chip.c-gate i{
+    border-radius:0;background:repeating-linear-gradient(-45deg,var(--caution) 0 4px,var(--ink) 4px 8px);
+  }
+  .legend-note{font-size:13.5px;color:var(--ink-soft);flex-basis:100%;margin-top:4px}
+
+  /* ---------- section headers ---------- */
+  section{padding:64px 0 22px}
+  .sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:14px}
+  .sec-num{
+    font-family:"Spline Sans Mono",monospace;font-size:13px;font-weight:600;
+    color:var(--paper);background:var(--ink);padding:4px 10px;flex:none;
+  }
+  h2{font-size:clamp(30px,4.4vw,46px);font-weight:800;letter-spacing:-.01em;line-height:1.05}
+  h2 em{font-style:italic;font-weight:500;color:var(--rust)}
+  .sec-sub{color:var(--ink-soft);max-width:68ch;margin-bottom:26px;font-size:17.5px}
+
+  /* ---------- the line ---------- */
+  .line{position:relative;margin-top:10px}
+  .zone{
+    position:relative;border-left:3px solid var(--ink);
+    margin-left:8px;padding:8px 0 8px 0;
+  }
+  .zone-label{
+    font-family:"Spline Sans Mono",monospace;font-size:12px;font-weight:600;
+    letter-spacing:.16em;text-transform:uppercase;
+    display:inline-block;margin:10px 0 14px 34px;padding:5px 12px;
+  }
+  .zone-before .zone-label{background:var(--teal);color:#fff}
+  .zone-machine{border-left-color:var(--rust)}
+  .zone-machine .zone-label{background:var(--rust);color:#fff}
+  .zone-after .zone-label{background:var(--teal);color:#fff}
+  .zone-machine-note{
+    margin:-6px 0 16px 34px;font-size:14.5px;color:var(--rust);
+    font-family:"Fraunces",serif;font-style:italic;font-weight:500;max-width:50ch;
+  }
+
+  .step{
+    position:relative;margin:0 0 14px 34px;padding:18px 20px 16px;
+    background:#fffdf6;border:1.5px solid var(--ink);
+    box-shadow:4px 4px 0 rgba(35,38,46,.14);
+    max-width:760px;
+    opacity:0;transform:translateY(14px);
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  .step.visible{opacity:1;transform:none}
+  .step::before{ /* connector to spine */
+    content:"";position:absolute;left:-34px;top:28px;width:34px;height:1.5px;background:var(--ink);
+  }
+  .step::after{ /* node on spine */
+    content:"";position:absolute;left:-40px;top:23px;width:11px;height:11px;border-radius:50%;
+    background:var(--paper);border:2.5px solid var(--ink);
+  }
+  .zone-machine .step::before{background:var(--rust)}
+  .zone-machine .step::after{border-color:var(--rust)}
+  .step-top{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .step-no{
+    font-family:"Fraunces",serif;font-weight:900;font-size:26px;line-height:1;
+    color:var(--ink);min-width:38px;
+  }
+  .step h3{font-size:19.5px;font-weight:800;letter-spacing:-.005em}
+  .step p{font-size:15.5px;color:var(--ink-soft);max-width:62ch}
+  .step p strong{color:var(--ink)}
+  .who{
+    display:inline-flex;align-items:center;gap:7px;margin-left:auto;
+    font-family:"Spline Sans Mono",monospace;font-size:11.5px;font-weight:600;
+    letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;flex:none;
+  }
+  .who i{width:8px;height:8px;border-radius:2px;display:inline-block}
+  .who.human{background:var(--teal-soft);color:var(--teal)}.who.human i{background:var(--teal)}
+  .who.cloud{background:var(--indigo-soft);color:var(--indigo)}.who.cloud i{background:var(--indigo)}
+  .who.bot{background:var(--rust-soft);color:var(--rust)}.who.bot i{background:var(--rust)}
+  .who.db{background:var(--bronze-soft);color:var(--bronze)}.who.db i{background:var(--bronze)}
+  .step .tag{
+    display:inline-block;font-family:"Spline Sans Mono",monospace;font-size:11px;
+    border:1px solid var(--rule);padding:2px 8px;margin-top:10px;margin-right:6px;color:var(--ink-soft);
+    background:var(--paper);
+  }
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 14px 34px;max-width:760px;position:relative}
+  .pair .step{margin:0;max-width:none}
+  .pair .step::before,.pair .step::after{display:none}
+  .pair::before{content:"";position:absolute;left:-34px;top:28px;width:34px;height:1.5px;background:var(--rust)}
+  .pair::after{content:"";position:absolute;left:-40px;top:23px;width:11px;height:11px;border-radius:50%;background:var(--paper);border:2.5px solid var(--rust)}
+  .pair-note{
+    grid-column:1 / -1;font-family:"Spline Sans Mono",monospace;font-size:12px;
+    color:var(--rust);letter-spacing:.08em;text-transform:uppercase;text-align:center;margin-top:-2px;
+  }
+
+  /* ---------- gate slots ---------- */
+  .gate-slot{
+    margin:4px 0 18px 34px;max-width:760px;position:relative;
+    border:2px dashed var(--ink-soft);background:rgba(255,253,246,.6);
+    transition:all .35s ease;cursor:pointer;
+  }
+  .gate-slot:hover{border-color:var(--ink);background:#fffdf6}
+  .gate-inner{display:flex;align-items:center;gap:16px;padding:13px 18px}
+  .gate-badge{
+    font-family:"Fraunces",serif;font-weight:900;font-size:20px;line-height:1;
+    width:38px;height:38px;display:flex;align-items:center;justify-content:center;
+    border:2px solid var(--ink-soft);border-radius:50%;flex:none;color:var(--ink-soft);
+    transition:all .3s ease;background:var(--paper);
+  }
+  .gate-text{flex:1;min-width:0}
+  .gate-text b{font-size:15.5px;display:block}
+  .gate-text span{font-size:13.5px;color:var(--ink-soft);display:block}
+  .gate-btn{
+    flex:none;font-family:"Spline Sans Mono",monospace;font-size:12px;font-weight:600;
+    letter-spacing:.08em;text-transform:uppercase;
+    border:1.5px solid var(--ink);background:transparent;color:var(--ink);
+    padding:8px 16px;cursor:pointer;border-radius:999px;transition:all .2s ease;
+  }
+  .gate-btn:hover{background:var(--ink);color:var(--paper)}
+  .gate-stripe{height:0;overflow:hidden;transition:height .35s ease}
+  .gate-slot.installed{border-style:solid;border-color:var(--ink);background:#fffdf6;box-shadow:4px 4px 0 rgba(35,38,46,.14)}
+  .gate-slot.installed .gate-badge{background:var(--caution);border-color:var(--ink);color:var(--ink)}
+  .gate-slot.installed .gate-stripe{
+    height:12px;
+    background:repeating-linear-gradient(-45deg,var(--caution) 0 12px,var(--ink) 12px 24px);
+    border-top:1.5px solid var(--ink);
+  }
+  .gate-slot.installed .gate-btn{background:var(--ink);color:var(--caution)}
+  .gate-slot.installed .gate-text b::after{
+    content:"  — STOP INSTALLED";font-family:"Spline Sans Mono",monospace;
+    font-size:11px;color:var(--rust);letter-spacing:.1em;
+  }
+
+  /* existing soft controls, small print under zones */
+  .existing{
+    margin:6px 0 18px 34px;max-width:760px;font-size:13.5px;color:var(--ink-soft);
+    border-left:3px solid var(--rule);padding:4px 0 4px 14px;
+  }
+
+  /* ---------- variance ---------- */
+  .variance{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:8px}
+  .card{
+    background:#fffdf6;border:1.5px solid var(--ink);padding:26px 26px 22px;
+    box-shadow:5px 5px 0 rgba(35,38,46,.14);
+  }
+  .card h3{font-size:21px;font-weight:800;margin-bottom:10px}
+  .card h3 .mono-sup{
+    font-family:"Spline Sans Mono",monospace;font-size:11px;font-weight:600;letter-spacing:.14em;
+    color:var(--rust);display:block;margin-bottom:8px;text-transform:uppercase;
+  }
+  .card p{font-size:15px;color:var(--ink-soft)}
+  .card p strong{color:var(--ink)}
+  .hookpool{display:flex;flex-wrap:wrap;gap:5px;margin:16px 0 10px}
+  .hk{
+    width:18px;height:18px;border-radius:4px;border:1.5px solid var(--ink-soft);
+    background:var(--paper-deep);transition:transform .2s ease;
+  }
+  .hk.m{border-color:var(--rust);background:var(--rust-soft)}
+  .hk.pick{background:var(--caution);border-color:var(--ink);transform:scale(1.25);box-shadow:2px 2px 0 rgba(35,38,46,.3)}
+  .hookpool-caption{font-family:"Spline Sans Mono",monospace;font-size:12px;color:var(--ink-soft)}
+  .voices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+  .voice{border:1.5px solid var(--rust);padding:14px;background:var(--rust-soft)}
+  .voice .mono-sup{font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.1em;color:var(--rust);text-transform:uppercase}
+  .voice b{font-family:"Fraunces",serif;font-size:17px;display:block;margin:4px 0 4px}
+  .voice span{font-size:13px;color:var(--ink-soft);display:block}
+  .passes{width:100%;border-collapse:collapse;margin-top:18px;font-size:14px}
+  .passes th,.passes td{border:1px solid var(--rule);padding:8px 10px;text-align:left;vertical-align:top}
+  .passes th{font-family:"Spline Sans Mono",monospace;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;background:var(--paper-deep)}
+  .passes td:first-child{font-family:"Fraunces",serif;font-weight:800;font-size:17px}
+
+  /* ---------- three doors ---------- */
+  .doors{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:8px}
+  .door{
+    background:#fffdf6;border:1.5px solid var(--ink);padding:20px;
+    box-shadow:4px 4px 0 rgba(35,38,46,.14);position:relative;
+  }
+  .door .mono-sup{font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.14em;color:var(--teal);text-transform:uppercase;display:block;margin-bottom:6px}
+  .door h3{font-size:20px;font-weight:800;margin-bottom:6px}
+  .door p{font-size:14px;color:var(--ink-soft)}
+  .door .keys{margin-top:12px;font-family:"Spline Sans Mono",monospace;font-size:12px;color:var(--ink);background:var(--paper-deep);display:inline-block;padding:3px 9px;border:1px solid var(--rule)}
+  .converge{
+    text-align:center;margin:6px auto 0;max-width:560px;position:relative;padding-top:34px;
+  }
+  .converge::before{
+    content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:2px;height:30px;background:var(--ink);
+  }
+  .bank{
+    background:var(--ink);color:var(--paper);padding:22px 26px;
+    font-family:"Fraunces",serif;
+  }
+  .bank b{font-size:23px;font-weight:800;display:block}
+  .bank span{font-family:"Spline Sans",sans-serif;font-size:14px;opacity:.85;display:block;margin-top:6px}
+  .converge .down{font-family:"Spline Sans Mono",monospace;font-size:13px;color:var(--ink-soft);padding:12px 0}
+  .machine-pill{
+    display:inline-block;background:var(--rust);color:#fff;font-family:"Fraunces",serif;
+    font-weight:800;font-size:19px;padding:12px 30px;
+  }
+  .exception{
+    margin-top:26px;border:1.5px solid var(--rust);background:var(--rust-soft);
+    padding:16px 20px;font-size:14.5px;max-width:760px;
+  }
+  .exception b{font-family:"Fraunces",serif;font-size:16px;color:var(--rust)}
+
+  /* ---------- brief problem ---------- */
+  .brief-callout{
+    background:var(--ink);color:var(--paper);padding:46px 44px;margin-top:8px;position:relative;overflow:hidden;
+  }
+  .brief-callout::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:12px;
+    background:repeating-linear-gradient(-45deg,var(--caution) 0 12px,var(--ink) 12px 24px);
+  }
+  .brief-callout h3{font-size:clamp(24px,3.4vw,34px);font-weight:800;max-width:24ch;line-height:1.15}
+  .brief-callout h3 em{font-style:italic;color:var(--caution);font-weight:500}
+  .brief-callout p{margin-top:14px;font-size:16px;opacity:.92;max-width:64ch}
+  .brief-quote{
+    margin-top:22px;border-left:3px solid var(--caution);padding-left:18px;
+    font-family:"Fraunces",serif;font-style:italic;font-size:17.5px;line-height:1.5;max-width:58ch;opacity:.95;
+  }
+  .brief-quote cite{display:block;font-family:"Spline Sans Mono",monospace;font-style:normal;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;margin-top:10px;opacity:.7}
+
+  /* ---------- picks panel ---------- */
+  .picks{background:#fffdf6;border:2px solid var(--ink);box-shadow:6px 6px 0 rgba(35,38,46,.16);padding:34px 34px 30px;margin-top:8px}
+  .picks h3{font-size:24px;font-weight:800;margin-bottom:4px}
+  .picks .sub{font-size:15px;color:var(--ink-soft);margin-bottom:20px}
+  .pick-row{
+    display:flex;align-items:center;gap:16px;padding:14px 0;border-top:1px solid var(--rule);
+  }
+  .pick-row:last-of-type{border-bottom:1px solid var(--rule)}
+  .pick-row .gate-badge{width:34px;height:34px;font-size:17px}
+  .pick-row.on .gate-badge{background:var(--caution);border-color:var(--ink);color:var(--ink)}
+  .pick-row .t{flex:1}
+  .pick-row .t b{font-size:15.5px;display:block}
+  .pick-row .t span{font-size:13px;color:var(--ink-soft)}
+  .pick-row .where{font-family:"Spline Sans Mono",monospace;font-size:11.5px;color:var(--ink-soft);flex:none;text-align:right}
+  .picks-actions{display:flex;gap:14px;margin-top:22px;flex-wrap:wrap;align-items:center}
+  .btn-primary{
+    font-family:"Spline Sans Mono",monospace;font-size:13px;font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;background:var(--ink);color:var(--caution);border:1.5px solid var(--ink);
+    padding:13px 26px;cursor:pointer;transition:all .2s ease;
+  }
+  .btn-primary:hover{background:var(--rust);border-color:var(--rust);color:#fff}
+  .btn-ghost{
+    font-family:"Spline Sans Mono",monospace;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+    background:transparent;color:var(--ink-soft);border:1.5px solid var(--rule);padding:13px 22px;cursor:pointer;transition:all .2s ease;
+  }
+  .btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+  .copied-note{font-family:"Spline Sans Mono",monospace;font-size:12.5px;color:var(--teal);opacity:0;transition:opacity .3s ease}
+  .copied-note.show{opacity:1}
+
+  footer{margin-top:80px;border-top:3px solid var(--ink);padding:30px 0 60px}
+  footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  footer p{font-family:"Spline Sans Mono",monospace;font-size:12px;color:var(--ink-soft);max-width:60ch}
+
+  @media (max-width:760px){
+    .variance,.doors,.voices{grid-template-columns:1fr}
+    .pair{grid-template-columns:1fr}
+    .who{margin-left:0}
+    .brief-callout{padding:36px 24px}
+    .picks{padding:26px 20px}
+    .pick-row .where{display:none}
+    .gate-inner{flex-wrap:wrap}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .step{opacity:1;transform:none;transition:none}
+  }
+</style>
+</head>
+<body>
+<main>
+
+  <!-- ============ HEADER ============ -->
+  <header>
+    <div class="wrap">
+      <div class="kicker"><span class="dot"></span> EXODUS · INTERNAL MAP · JUNE 2026 <span style="opacity:.4">/</span> PREPARED FOR LUKE</div>
+      <h1>How an ad gets <em>written.</em></h1>
+      <p class="lede">This is the copy pipeline exactly as it runs today — every step, who does it, and where a human can (and can't) step in. <strong>Your job on this page:</strong> read the line top to bottom, then click the dashed slots to mark where you'd stop the machine for a human decision. Your picks save automatically — copy them at the bottom and send them to Brad.</p>
+      <div class="header-meta">
+        <div>SOURCE <b>traced from live code</b></div>
+        <div>RUNTIME <b>~12–15 min per run</b></div>
+        <div>OUTPUT <b>2 ad variants → Google Doc</b></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ LEGEND ============ -->
+  <div class="wrap">
+    <div class="legend">
+      <span class="chip c-human"><i></i>PERSON / LOCAL CLAUDE</span>
+      <span class="chip c-cloud"><i></i>CLOUD SCRIPT</span>
+      <span class="chip c-bot"><i></i>GENESIS BOT (Luke's server)</span>
+      <span class="chip c-db"><i></i>DATABASE</span>
+      <span class="chip c-gate"><i></i>GATE SLOT — click to install a stop</span>
+      <p class="legend-note">"Local Claude" = the AI assistant on the customer's machine. "Genesis bot" = your bots at gas.copycoders.ai — their personalities live on your server, not in the app. "Cloud script" = dumb plumbing we wrote: no judgment, it just follows steps.</p>
+    </div>
+  </div>
+
+  <!-- ============ THE LINE ============ -->
+  <section id="line">
+    <div class="wrap">
+      <div class="sec-head"><span class="sec-num">01</span><h2>The assembly line</h2></div>
+      <p class="sec-sub">One run, top to bottom. The big thing to know: <strong>once step 3 fires, nothing stops until the Doc is done.</strong> Every human choice today happens before the machine starts or after it finishes.</p>
+
+      <div class="line">
+
+        <!-- ZONE: BEFORE -->
+        <div class="zone zone-before">
+          <span class="zone-label">Before the machine — humans live here</span>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">1</span><h3>The ask</h3><span class="who human"><i></i>Person</span></div>
+            <p>The customer wants ads. They hand over an idea, an Instagram reel, a competitor ad link, or a rough brief.</p>
+          </div>
+
+          <div class="gate-slot" data-gate="A" role="button" tabindex="0" aria-pressed="false">
+            <div class="gate-inner">
+              <span class="gate-badge">A</span>
+              <span class="gate-text"><b>Gate A — Idea approval</b><span>Review and refine captured ideas before any of them become a brief. (Half exists: the Idea Bank — but the one-shot "write from this reel now" commands skip it.)</span></span>
+              <button class="gate-btn" type="button">Install</button>
+            </div>
+            <div class="gate-stripe"></div>
+          </div>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">2</span><h3>The brief gets written</h3><span class="who human"><i></i>Local Claude</span></div>
+            <p>Claude Code writes a 1–2 paragraph brief from whatever the customer gave. <strong>There is no template and no rules</strong> — it improvises. It's supposed to show the brief as a "gut check," but nothing forces that or waits for a yes.</p>
+            <span class="tag">improvised — no skill, no schema</span>
+          </div>
+
+          <div class="gate-slot" data-gate="B" role="button" tabindex="0" aria-pressed="false">
+            <div class="gate-inner">
+              <span class="gate-badge">B</span>
+              <span class="gate-text"><b>Gate B — Brief approval</b><span>The brief must be read and approved before the run can fire. Cheapest gate to build, and it guards the single most important input.</span></span>
+              <button class="gate-btn" type="button">Install</button>
+            </div>
+            <div class="gate-stripe"></div>
+          </div>
+        </div>
+
+        <!-- ZONE: MACHINE -->
+        <div class="zone zone-machine">
+          <span class="zone-label">The machine — runs straight through, no stops</span>
+          <p class="zone-machine-note">From here to step 14 there is currently no pause, no preview, no way to redirect. Fire and wait.</p>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">3</span><h3>Fire</h3><span class="who human"><i></i>Local Claude</span></div>
+            <p>Claude Code runs the <span class="mono">exodus genesis</span> command. A run record is created. The button is pressed.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">4</span><h3>Safety check &amp; handoff</h3><span class="who db"><i></i>Database</span></div>
+            <p>The backend checks the brand is ready (primer exists, the customer's AI keys work), takes a snapshot of the brand foundation, and hands the job to the cloud. It can <strong>fail</strong> here — but it can't pause.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">5–6</span><h3>Load seeds, pick the primer</h3><span class="who cloud"><i></i>Cloud script</span></div>
+            <p>Reads any creative seeds passed with the run, then picks the right primer for the awareness level (cold vs. warm). Your brand-level steering text rides along here.</p>
+          </div>
+
+          <div class="pair">
+            <div class="step">
+              <div class="step-top"><span class="step-no">7</span><h3>Hooks — Mario voice</h3><span class="who bot"><i></i>ad-hook-bot-1</span></div>
+              <p>Primed with the brand primer, fed the brief + hook bank + seeds. Writes ~20 hooks, then gets pushed once more for the visceral ones.</p>
+            </div>
+            <div class="step">
+              <div class="step-top"><span class="step-no">8</span><h3>Hooks — Infeed voice</h3><span class="who bot"><i></i>in-feed-vsl-bot</span></div>
+              <p>Same inputs, different voice. Another ~20 hooks. Both bots run at the same time.</p>
+            </div>
+            <span class="pair-note">▲ run in parallel → merged into one ~40-hook pool</span>
+          </div>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">9</span><h3>Hooks get picked — by a script</h3><span class="who cloud"><i></i>Cloud script</span></div>
+            <p>A script — <strong>not a person, not a bot</strong> — picks the 2 most "diverse" hooks from the pool of ~40. The other 38 are discarded unseen. (A manual-pick override already exists in the code; nothing surfaces it to a human yet.)</p>
+            <span class="tag">easiest place to add a human</span>
+          </div>
+
+          <div class="gate-slot" data-gate="C" role="button" tabindex="0" aria-pressed="false">
+            <div class="gate-inner">
+              <span class="gate-badge">C</span>
+              <span class="gate-text"><b>Gate C — Hook review</b><span>Show the human all ~40 hooks; they pick the ones the writers build on. The plumbing is half-built already. Also the natural place to split this into two pipelines: hooks → [human] → copy.</span></span>
+              <button class="gate-btn" type="button">Install</button>
+            </div>
+            <div class="gate-stripe"></div>
+          </div>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">10</span><h3>Body copy + headlines — Mario</h3><span class="who bot"><i></i>mariobot</span></div>
+            <p>Gets the primer, then hook #1 woven into its instructions, plus the brief and headline bank. Writes 700–1500 words of body copy, then 4 headlines <strong>in the same conversation</strong> — there is no separate headline bot.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">11</span><h3>Body copy + headlines — Infeed</h3><span class="who bot"><i></i>in-feed-vsl-bot</span></div>
+            <p>Same routine from hook #2. More passes requested = more rounds here (and a Top-Ads-flavored round on pass 2).</p>
+          </div>
+
+          <div class="gate-slot" data-gate="E" role="button" tabindex="0" aria-pressed="false">
+            <div class="gate-inner">
+              <span class="gate-badge">E</span>
+              <span class="gate-text"><b>Gate E — Draft review</b><span>Read the raw variants before they're polished and shipped; kick weak ones back for a rewrite instead of receiving them in the finished Doc.</span></span>
+              <button class="gate-btn" type="button">Install</button>
+            </div>
+            <div class="gate-stripe"></div>
+          </div>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">12</span><h3>QA checklist</h3><span class="who cloud"><i></i>Cloud script</span></div>
+            <p>A 15-point automated check with auto-fixes. It's a checklist, not a judgment call — no taste involved.</p>
+          </div>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">13–14</span><h3>The Doc is written &amp; saved</h3><span class="who cloud"><i></i>Cloud script</span></div>
+            <p>Everything is formatted into a Google Doc — one tab per variant, hook merged into the full ad — and the run flips to "completed."</p>
+          </div>
+        </div>
+
+        <!-- ZONE: AFTER -->
+        <div class="zone zone-after">
+          <span class="zone-label">After the machine — humans again</span>
+
+          <div class="step">
+            <div class="step-top"><span class="step-no">15</span><h3>Doc lands · edit menu opens</h3><span class="who human"><i></i>Person</span></div>
+            <p>The customer reads the Doc. They can now run per-variant edits — Natural-language / Shorten / Cut / Simplify / Make Better — each one a quick pass by the <span class="mono">edit-pass</span> bot. <strong>This is the only feedback loop that exists, and it comes after everything already ran.</strong></p>
+          </div>
+
+          <p class="existing">Also existing today (soft controls, none of them block a run): curating the Idea Bank before writing · the unenforced brief "gut check" · brand-level steering text ("always do / never mention") that rides into every run.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ VARIANCE ============ -->
+  <section id="variance">
+    <div class="wrap">
+      <div class="sec-head"><span class="sec-num">02</span><h2>Where the <em>variety</em> comes from</h2></div>
+      <p class="sec-sub">Two mechanisms, and the order matters: hooks are chosen <strong>before</strong> any copy exists, and each writer builds the ad <em>around</em> the hook it was handed.</p>
+
+      <div class="variance">
+        <div class="card">
+          <h3><span class="mono-sup">Mechanism 1</span>Hooks first, copy second</h3>
+          <p>Two voices each write ~20 hooks. The pools merge into ~40. A script picks 2. Those 2 are injected into the writers' instructions — the hook is never bolted on afterwards.</p>
+          <div class="hookpool" aria-hidden="true">
+            <div class="hk m"></div><div class="hk m"></div><div class="hk m pick"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk m"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk pick"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div><div class="hk"></div>
+          </div>
+          <p class="hookpool-caption">≈40 hooks generated · 2 survive (yellow) · 38 discarded unseen</p>
+        </div>
+
+        <div class="card">
+          <h3><span class="mono-sup">Mechanism 2</span>Two writers, same brief</h3>
+          <p>One "pass" = one variant from each voice, both writing from the brand primer. That's why the default output is 2 ads: same brief, two personalities.</p>
+          <div class="voices">
+            <div class="voice"><span class="mono-sup">Voice 1</span><b>mariobot</b><span>Mario voice · hook #1 · brand primer</span></div>
+            <div class="voice"><span class="mono-sup">Voice 2</span><b>in-feed-vsl-bot</b><span>Infeed VSL voice · hook #2 · brand primer</span></div>
+          </div>
+          <table class="passes">
+            <tr><th>Passes</th><th>Variants</th><th>What's added</th></tr>
+            <tr><td>1</td><td>2</td><td>Mario + Infeed × brand primer (the default)</td></tr>
+            <tr><td>2</td><td>4</td><td>+ both voices × <strong>Top-Ads primer</strong> (built from the brand's real best performers, if their ad account is connected)</td></tr>
+            <tr><td>3+</td><td>6+</td><td>repeats the brand-primer pair</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ THREE DOORS ============ -->
+  <section id="doors">
+    <div class="wrap">
+      <div class="sec-head"><span class="sec-num">03</span><h2>Three doors, <em>one</em> machine</h2></div>
+      <p class="sec-sub">Gambit, organic, and swipe are not three pipelines. They're three capture doors that all deposit into the same Idea Bank — and from there, one identical path into the machine above. The bots never know which door an idea came through.</p>
+
+      <div class="doors">
+        <div class="door">
+          <span class="mono-sup">Door 1 · keys G1, G2…</span>
+          <h3>Gambit</h3>
+          <p>Customer brain-dumps raw angles as text. A splitter bot breaks the dump into distinct ideas.</p>
+          <span class="keys">bot: gambit-splitter</span>
+        </div>
+        <div class="door">
+          <span class="mono-sup">Door 2 · keys O1, O2…</span>
+          <h3>Organic</h3>
+          <p>Customer pastes an Instagram/TikTok reel. It's scraped, transcribed, on-screen text read — then a bot forms one idea from it.</p>
+          <span class="keys">bot: organic-idea-extractor</span>
+        </div>
+        <div class="door">
+          <span class="mono-sup">Door 3 · keys A1, A2…</span>
+          <h3>Swipe</h3>
+          <p>Customer pastes a Facebook Ad Library link. Copy, video transcript and on-screen text are scraped; a bot extracts the concept. Optional "what to model" steering rides along.</p>
+          <span class="keys">bot: swipe-concept-extractor</span>
+        </div>
+      </div>
+
+      <div class="converge">
+        <div class="bank">
+          <b>THE IDEA BANK</b>
+          <span>every idea = a hook + a short concept + optional notes · the concept becomes the brief <em>verbatim</em>, the hook becomes a seed</span>
+        </div>
+        <div class="down">▼ &nbsp;same escalation for all three&nbsp; ▼</div>
+        <span class="machine-pill">THE MACHINE (steps 3–14 above)</span>
+      </div>
+
+      <div class="exception">
+        <b>The one exception:</b> writing from a <em>previously saved</em> competitor ad takes a completely different road — it skips the Idea Bank and the machine above entirely and runs through a separate "remix" pipeline. If you want all swipe-writing on one rail, that's a seam to deal with.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BRIEF PROBLEM ============ -->
+  <section id="brief">
+    <div class="wrap">
+      <div class="sec-head"><span class="sec-num">04</span><h2>The brief <em>problem</em></h2></div>
+      <div class="brief-callout">
+        <h3>The most important input is the <em>least defined step</em> in the system.</h3>
+        <p>There is no brief template, no rules, no check. The system accepts literally any text as a brief. The local Claude improvises one from whatever the customer said — so two customers asking for the same thing can get structurally different briefs. And when writing from a banked idea, there's no brief-writing at all: the idea's stored description ships to your bots word-for-word, as captured.</p>
+        <div class="brief-quote">
+          "If the user gave you an idea, a winning ad, or a rough angle, you write the brief from it; surface it for a quick gut-check before running."
+          <cite>— the only brief 'rule' that exists today: a suggestion inside an instruction file</cite>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PICKS ============ -->
+  <section id="picks">
+    <div class="wrap">
+      <div class="sec-head"><span class="sec-num">05</span><h2>Your <em>picks</em></h2></div>
+      <p class="sec-sub">The same four gates from the line above, in one place. Toggle here or up on the line — they stay in sync and save in this browser. When you're done, hit the button and paste the result to Brad.</p>
+
+      <div class="picks">
+        <h3>Where should the line stop?</h3>
+        <p class="sub">Brad's read, for what it's worth: <strong>B + C</strong> give the most control for the least build — approve the input, pick the hooks, leave the rest alone.</p>
+
+        <div class="pick-row" data-gate="A">
+          <span class="gate-badge">A</span>
+          <span class="t"><b>Idea approval</b><span>review captured ideas before any become briefs — make the one-shot commands stop at the bank too</span></span>
+          <span class="where">before step 2</span>
+          <button class="gate-btn" type="button">Install</button>
+        </div>
+        <div class="pick-row" data-gate="B">
+          <span class="gate-badge">B</span>
+          <span class="t"><b>Brief approval</b><span>the brief must be read &amp; approved before the run fires — turns the gut-check custom into a mechanism</span></span>
+          <span class="where">before step 3</span>
+          <button class="gate-btn" type="button">Install</button>
+        </div>
+        <div class="pick-row" data-gate="C">
+          <span class="gate-badge">C</span>
+          <span class="t"><b>Hook review</b><span>human sees all ~40 hooks and picks — plumbing half-built; natural split point for two pipelines</span></span>
+          <span class="where">after step 9</span>
+          <button class="gate-btn" type="button">Install</button>
+        </div>
+        <div class="pick-row" data-gate="E">
+          <span class="gate-badge">E</span>
+          <span class="t"><b>Draft review</b><span>read raw variants before QA &amp; the Doc — kick weak ones back for a rewrite</span></span>
+          <span class="where">after step 11</span>
+          <button class="gate-btn" type="button">Install</button>
+        </div>
+
+        <div class="picks-actions">
+          <button class="btn-primary" id="copyPicks" type="button">Copy my picks for Brad</button>
+          <button class="btn-ghost" id="clearPicks" type="button">Clear all</button>
+          <span class="copied-note" id="copiedNote">copied — paste it anywhere</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p>TRACED FROM THE LIVE CODEBASE · JUNE 10 2026 · THE FULL TECHNICAL VERSION (FILE PATHS, CODE) LIVES IN <b>COPY-PIPELINE-CURRENT.MD</b> IN THE REPO.</p>
+      <p>BOT PERSONALITIES LIVE ON LUKE'S SERVER — THIS APP ONLY SENDS THEM THEIR INPUTS.</p>
+    </div>
+  </footer>
+
+</main>
+
+<script>
+(function(){
+  var GATES = ["A","B","C","E"];
+  var NAMES = {
+    A:"Gate A — Idea approval (before the brief is written)",
+    B:"Gate B — Brief approval (before the run fires)",
+    C:"Gate C — Hook review (human picks from the ~40-hook pool)",
+    E:"Gate E — Draft review (before QA & the Google Doc)"
+  };
+  var KEY = "exodus-pipeline-gates";
+
+  function load(){
+    try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; }
+  }
+  function save(state){
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  }
+  var state = load();
+
+  function render(){
+    GATES.forEach(function(g){
+      var on = !!state[g];
+      document.querySelectorAll('[data-gate="'+g+'"]').forEach(function(el){
+        el.classList.toggle("installed", on);
+        el.classList.toggle("on", on);
+        if(el.hasAttribute("aria-pressed")) el.setAttribute("aria-pressed", String(on));
+        var btn = el.querySelector(".gate-btn");
+        if(btn) btn.textContent = on ? "Remove" : "Install";
+      });
+    });
+  }
+
+  function toggle(g){
+    state[g] = !state[g];
+    save(state);
+    render();
+  }
+
+  document.querySelectorAll("[data-gate]").forEach(function(el){
+    el.addEventListener("click", function(e){
+      toggle(el.getAttribute("data-gate"));
+      e.preventDefault();
+    });
+    el.addEventListener("keydown", function(e){
+      if(e.key === "Enter" || e.key === " "){ toggle(el.getAttribute("data-gate")); e.preventDefault(); }
+    });
+  });
+
+  document.getElementById("clearPicks").addEventListener("click", function(e){
+    e.stopPropagation();
+    state = {};
+    save(state);
+    render();
+  });
+
+  document.getElementById("copyPicks").addEventListener("click", function(e){
+    e.stopPropagation();
+    var picked = GATES.filter(function(g){ return state[g]; });
+    var lines = ["LUKE'S PIPELINE PICKS — " + new Date().toLocaleDateString(), ""];
+    if(picked.length === 0){
+      lines.push("(no gates installed yet)");
+    } else {
+      picked.forEach(function(g){ lines.push("STOP: " + NAMES[g]); });
+    }
+    lines.push("");
+    GATES.filter(function(g){ return !state[g]; }).forEach(function(g){
+      lines.push("skip: " + NAMES[g]);
+    });
+    var text = lines.join("\n");
+    function done(){
+      var n = document.getElementById("copiedNote");
+      n.classList.add("show");
+      setTimeout(function(){ n.classList.remove("show"); }, 2200);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, function(){ fallback(text); done(); });
+    } else { fallback(text); done(); }
+    function fallback(t){
+      var ta = document.createElement("textarea");
+      ta.value = t; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand("copy"); }catch(err){}
+      document.body.removeChild(ta);
+    }
+  });
+
+  // scroll-reveal for steps
+  if("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if(en.isIntersecting){ en.target.classList.add("visible"); io.unobserve(en.target); }
+      });
+    }, {threshold:.12});
+    document.querySelectorAll(".step").forEach(function(s){ io.observe(s); });
+  } else {
+    document.querySelectorAll(".step").forEach(function(s){ s.classList.add("visible"); });
+  }
+  // safety net: never leave cards hidden (printing, PDF export, odd browsers)
+  function showAll(){ document.querySelectorAll(".step").forEach(function(s){ s.classList.add("visible"); }); }
+  setTimeout(showAll, 1500);
+  window.addEventListener("beforeprint", showAll);
+
+  render();
+})();
+</script>
+</body>
+</html>

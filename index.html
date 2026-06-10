@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shared Docs — Brad &amp; Luke</title>
+<meta name="description" content="Working documents for collaboration." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,800;0,9..144,900;1,9..144,500&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5efe2; --ink:#23262e; --ink-soft:#4c4f58; --rule:#cfc2a4;
+    --rust:#b04a1f; --caution:#e9b50b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:"Spline Sans",sans-serif; font-size:17px; line-height:1.6;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E"),
+      linear-gradient(var(--rule) 1px, transparent 1px),
+      linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+    background-size:160px 160px, 56px 56px, 56px 56px; opacity:.5;
+  }
+  main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:80px 28px 100px}
+  .kicker{
+    font-family:"Spline Sans Mono",monospace;font-size:12.5px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--ink-soft);display:flex;gap:12px;align-items:center;
+  }
+  .kicker .dot{width:8px;height:8px;background:var(--rust);border-radius:50%}
+  h1{font-family:"Fraunces",serif;font-weight:900;font-size:clamp(40px,7vw,64px);line-height:1;letter-spacing:-.015em;margin:20px 0 14px}
+  h1 em{font-style:italic;font-weight:500;color:var(--rust)}
+  .lede{color:var(--ink-soft);max-width:54ch;margin-bottom:48px}
+  .doc{
+    display:block;text-decoration:none;color:inherit;background:#fffdf6;
+    border:1.5px solid var(--ink);box-shadow:5px 5px 0 rgba(35,38,46,.14);
+    padding:26px 28px;margin-bottom:18px;transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .doc:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 rgba(35,38,46,.18)}
+  .doc .date{font-family:"Spline Sans Mono",monospace;font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+  .doc h2{font-family:"Fraunces",serif;font-weight:800;font-size:25px;margin:6px 0 6px;letter-spacing:-.01em}
+  .doc p{font-size:15px;color:var(--ink-soft)}
+  .doc .go{
+    display:inline-block;margin-top:14px;font-family:"Spline Sans Mono",monospace;font-size:12px;
+    font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--rust);
+    border-bottom:2px solid var(--caution);padding-bottom:2px;
+  }
+  footer{margin-top:60px;border-top:1.5px solid var(--rule);padding-top:18px;
+    font-family:"Spline Sans Mono",monospace;font-size:12px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker"><span class="dot"></span> BRAD × LUKE · WORKING DOCUMENTS</div>
+  <h1>Shared <em>docs.</em></h1>
+  <p class="lede">Living documents we're collaborating on. Each one is built to be read in the browser — no tools needed.</p>
+
+  <a class="doc" href="copy-pipeline/">
+    <span class="date">June 2026 · Interactive</span>
+    <h2>The Copy Machine — how an ad gets written</h2>
+    <p>The full copy pipeline as it runs today: every step, who does it, where the variety comes from, and the three input doors. Click the dashed gate slots to mark where a human should stop the line, then copy your picks.</p>
+    <span class="go">Open →</span>
+  </a>
+
+  <footer>NEW DOCS GET ADDED TO THIS LIST AS THEY'RE MADE.</footer>
+</main>
+</body>
+</html>
