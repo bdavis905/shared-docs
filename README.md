@@ -19,7 +19,7 @@ dlc/            DLC
 
 | Client | Doc | What it is |
 |---|---|---|
-| Genesis | [The Copy Machine](https://bdavis905.github.io/shared-docs/genesis/copy-pipeline/) | Interactive map of the copy pipeline as it runs today — mark where humans should step in. Technical companion: [`genesis/copy-pipeline/TECHNICAL-DETAIL.md`](genesis/copy-pipeline/TECHNICAL-DETAIL.md). |
+| Genesis | [The copy pipeline, as it runs today](https://bdavis905.github.io/shared-docs/genesis/copy-pipeline/) | Step-by-step map of the current copy flow. Technical companion: [`genesis/copy-pipeline/TECHNICAL-DETAIL.md`](genesis/copy-pipeline/TECHNICAL-DETAIL.md). |
 
 ## Adding a doc
 
