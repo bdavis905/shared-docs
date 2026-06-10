@@ -26,7 +26,7 @@ There is also a fourth bot, `edit-pass`, used only for the after-the-fact editin
 
 ## 1. The Whole Flow, Numbered (mark your gates between these lines)
 
-This is the default run: a brief goes in, 2 ad variants come out in a Google Doc. Takes roughly 12–15 minutes.
+This is the default run: a brief goes in, 2 ad variants come out in a Google Doc.
 
 ```
 WHERE THE WORK HAPPENS:        [Local]   = Claude Code on the customer's machine
@@ -101,7 +101,7 @@ One "pass" = one variant from `mariobot` + one variant from `in-feed-vsl-bot`, b
 | Passes requested (`--passes`) | Variants | What each pass uses |
 |---|---|---|
 | 1 (default) | 2 | Mario × Brand primer + Infeed × Brand primer |
-| 2 | 4 | adds: Mario + Infeed × **Top-Ads-Biased primer** (built from the brand's actual best-performing Meta ads — only if an ad account is connected; otherwise falls back to the brand primer) |
+| 2 | 4 | adds: Mario + Infeed × **Top-Ads-Biased primer** (built from the top-performing ads the brand has shared — falls back to the brand primer when none are available) |
 | 3+ | 6+ | repeats the brand-primer pair |
 
 Each variant is labeled by its **track** (mario-brand / infeed-brand / topads) and gets its own tab in the Google Doc.
