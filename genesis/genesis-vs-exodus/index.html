@@ -100,15 +100,13 @@
   <p>If you don't say "exodus," Exodus stays out of your way — your workshop skills and custom recipes run untouched in the same folder.</p>
   <p class="note">Heads-up: saying "genesis" works when <em>your</em> setup is present — your <code>gen_</code> key from the members area saved as <code>GENESIS_API_KEY</code> in the folder's <code>.env</code>, plus your skills/recipes. Exodus does not install that key for you (its own Genesis access lives server-side, tied to your account). Auto-installing your key into the folder is on the roadmap.</p>
 
-  <h2>Which setup do you have?</h2>
-  <table>
-    <tr><th>You have…</th><th>What that means</th></tr>
-    <tr><td><strong>Genesis API key only</strong></td><td>You call bots directly — Claude Code, OpenClaw, your own scripts. Nothing changes for you.</td></tr>
-    <tr><td><strong>+ Exodus</strong></td><td>Your project folder's <code>.env</code> has <code>EXODUS_API_KEY</code>. Say "exodus" for pipelines; everything else in the folder stays yours.</td></tr>
-    <tr><td><strong>+ workshop skill pack</strong></td><td>Your own recipes calling Genesis directly with your <code>gen_</code> key. Works alongside Exodus in the same folder after the update.</td></tr>
-    <tr><td><strong>All three</strong></td><td>One folder is fine: <code>.env</code> holds <code>EXODUS_API_KEY</code> (Exodus) and <code>GENESIS_API_KEY</code> + <code>ANTHROPIC_API_KEY</code> (your direct calls). They ignore each other's variables.</td></tr>
-  </table>
-  <p><strong>Quick tell — "what am I using right now?"</strong> Look at what you typed. Said "exodus"? You're in Exodus. Said "genesis" or named a bot? That's your own key. Deeper check: <code>npx exodus whoami</code> shows your Exodus brand and account.</p>
+  <h2>Which one am I using right now?</h2>
+  <p>However you've organized your folders — Exodus in one, your Genesis skills in another, or everything together — the tell is simply <strong>what you typed</strong>:</p>
+  <ul>
+    <li>Said <strong>"exodus"</strong>? You're running an Exodus pipeline.</li>
+    <li>Said <strong>"genesis"</strong> or named a bot? That's a direct Genesis call with your own key and your own skills.</li>
+  </ul>
+  <p>Before this update, Exodus's skills would grab requests meant for your own Genesis skills (and vice versa). Now they can't — Exodus only responds when you say "exodus." Deeper check anytime: <code>npx exodus whoami</code> shows which Exodus brand and account a folder is connected to.</p>
 
   <h2>Your keys — what each one is, what it pays for</h2>
   <table>
