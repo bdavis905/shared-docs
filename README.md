@@ -11,6 +11,7 @@ One folder per client; each doc is a self-contained page in its own subfolder.
 ```
 genesis/        Luke / Genesis
   copy-pipeline/        ← interactive map of the copy pipeline
+  genesis-vs-exodus/    ← member explainer (keys, billing, two-systems model)
 matt-beard/     Matt Beard
 dlc/            DLC
 ```
@@ -19,6 +20,7 @@ dlc/            DLC
 
 | Client | Doc | What it is |
 |---|---|---|
+| Genesis | [Genesis vs. Exodus](https://bdavis905.github.io/shared-docs/genesis/genesis-vs-exodus/) | Member explainer: one engine two drivers, every key, billing map, this week's FAQ. Pairs with exodus-v2026.6.1100. |
 | Genesis | [The copy pipeline, as it runs today](https://bdavis905.github.io/shared-docs/genesis/copy-pipeline/) | Step-by-step map of the current copy flow. Technical companion: [`genesis/copy-pipeline/TECHNICAL-DETAIL.md`](genesis/copy-pipeline/TECHNICAL-DETAIL.md). |
 
 ## Adding a doc

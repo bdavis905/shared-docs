@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Genesis vs. Exodus — what you have, and how to use both</title>
+<meta name="description" content="One engine, two ways to drive it. Every key, what gets billed when, and the answers to this week's questions." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,500&family=Spline+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#faf7f0;
+    --ink:#26282e;
+    --soft:#5a5d66;
+    --rule:#e0d9c8;
+    --teal:#1e6f62;   /* your own Genesis key (manual) */
+    --indigo:#46529a; /* Exodus (automatic) */
+    --rust:#b04a1f;   /* billing / caution */
+    --bronze:#85702f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper);color:var(--ink);
+    font-family:"Spline Sans",sans-serif;font-size:16.5px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  main{max-width:760px;margin:0 auto;padding:64px 24px 90px}
+  h1,h2,h3{font-family:"Fraunces",serif;letter-spacing:-.01em}
+  .mono{font-family:"Spline Sans Mono",monospace}
+  code{font-family:"Spline Sans Mono",monospace;font-size:.88em;background:#f1ecdf;border:1px solid var(--rule);border-radius:4px;padding:1px 5px;white-space:nowrap}
+  .kicker{font-family:"Spline Sans Mono",monospace;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft)}
+  h1{font-size:clamp(34px,5.6vw,46px);font-weight:800;line-height:1.08;margin:14px 0 12px}
+  h2{font-size:26px;font-weight:700;margin:54px 0 14px;padding-top:26px;border-top:1px solid var(--rule)}
+  h3{font-size:18px;font-weight:700;margin:26px 0 8px}
+  p{margin:0 0 14px;max-width:68ch}
+  .lede{color:var(--soft);max-width:60ch;font-size:18px}
+  .meta{margin-top:18px;padding-top:14px;border-top:1px solid var(--rule);
+    font-family:"Spline Sans Mono",monospace;font-size:12px;color:var(--soft)}
+  ul,ol{margin:0 0 14px 22px}
+  li{margin-bottom:8px}
+  strong{font-weight:600}
+
+  .drivers{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0}
+  @media(max-width:620px){.drivers{grid-template-columns:1fr}}
+  .driver{border:1px solid var(--rule);border-radius:10px;padding:18px 18px 14px;background:#fffdf8}
+  .driver .tag{font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;display:inline-block;margin-bottom:8px;padding:3px 8px;border-radius:99px;color:#fff}
+  .driver.manual .tag{background:var(--teal)}
+  .driver.auto .tag{background:var(--indigo)}
+  .driver h3{margin:0 0 6px}
+  .driver p{font-size:15px;color:var(--soft);margin-bottom:0}
+
+  .rules{border:1px solid var(--rule);border-radius:10px;background:#fffdf8;padding:18px 20px;margin:20px 0}
+  .rules p{margin-bottom:10px}
+  .rules p:last-child{margin-bottom:0}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0 22px;font-size:14.5px}
+  th{font-family:"Spline Sans Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);text-align:left;padding:8px 10px;border-bottom:2px solid var(--rule)}
+  td{padding:10px;border-bottom:1px solid var(--rule);vertical-align:top}
+  td:first-child{white-space:nowrap}
+  .billed{color:var(--rust);font-weight:600}
+  .free{color:var(--teal);font-weight:600}
+
+  .faq h3{padding-top:18px;border-top:1px dashed var(--rule)}
+  .breaks{border-left:3px solid var(--indigo);padding:4px 0 4px 18px;margin:18px 0}
+  .note{font-size:14px;color:var(--soft);border-left:3px solid var(--bronze);padding:2px 0 2px 14px;margin:14px 0}
+</style>
+</head>
+<body>
+<main>
+  <p class="kicker">Genesis · Exodus · Claude Code</p>
+  <h1>One engine, two ways to drive it</h1>
+  <p class="lede">What you actually have, which keys do what, what gets billed when — and the answers to this week's questions.</p>
+  <div class="meta">UPDATED JUNE 2026 · PAIRS WITH THE <span class="mono">exodus-v2026.6.1100</span> SKILL UPDATE</div>
+
+  <h2>The mental model</h2>
+  <p>The <strong>Genesis bots</strong> are the engine — Luke's trained copywriting and creative bots running on our server. You have two ways to drive that engine:</p>
+  <div class="drivers">
+    <div class="driver manual">
+      <span class="tag">Manual · your key</span>
+      <h3>Your Genesis API key</h3>
+      <p>You call the bots directly from Claude Code with your own <code>gen_</code> key, using your own recipes and skills (like the workshop pack). You pick the bot, build the conversation, shape the output.</p>
+    </div>
+    <div class="driver auto">
+      <span class="tag">Automatic · Exodus</span>
+      <h3>Exodus</h3>
+      <p>The done-for-you system. Pre-built pipelines run Luke's entire process — brief → hooks → body copy → headlines → Google Doc, plus image engines, the idea bank, and brand onboarding. It connects to the bots internally; you never configure a Genesis key for it.</p>
+    </div>
+  </div>
+  <p>Both are yours. Both can live in the same project folder. They don't share settings, and after the latest update they don't step on each other.</p>
+
+  <h2>What changed in the update</h2>
+  <p>First, run this in your project folder:</p>
+  <p><code>npx exodus update</code></p>
+  <p>Every Exodus skill is now namespaced (<code>exodus-genesis</code>, <code>exodus-write</code>, <code>exodus-image</code>…) plus one front door simply called <code>exodus</code>. Two rules to remember:</p>
+  <div class="rules">
+    <p>🚂 <strong>Say "exodus" to use Exodus.</strong> "Exodus, write me some ads." "Use exodus to make images." "Exodus, swipe this ad." Claude routes it to the right pipeline.</p>
+    <p>🔑 <strong>Say "genesis" to use your own bots.</strong> The word "genesis" by itself now always means <em>your</em> Genesis API key and <em>your</em> recipes — Exodus will not grab the request.</p>
+  </div>
+  <p>If you don't say "exodus," Exodus stays out of your way — your workshop skills and custom recipes run untouched in the same folder.</p>
+  <p class="note">Heads-up: saying "genesis" works when <em>your</em> setup is present — your <code>gen_</code> key from the members area saved as <code>GENESIS_API_KEY</code> in the folder's <code>.env</code>, plus your skills/recipes. Exodus does not install that key for you (its own Genesis access lives server-side, tied to your account). Auto-installing your key into the folder is on the roadmap.</p>
+
+  <h2>Which setup do you have?</h2>
+  <table>
+    <tr><th>You have…</th><th>What that means</th></tr>
+    <tr><td><strong>Genesis API key only</strong></td><td>You call bots directly — Claude Code, OpenClaw, your own scripts. Nothing changes for you.</td></tr>
+    <tr><td><strong>+ Exodus</strong></td><td>Your project folder's <code>.env</code> has <code>EXODUS_API_KEY</code>. Say "exodus" for pipelines; everything else in the folder stays yours.</td></tr>
+    <tr><td><strong>+ workshop skill pack</strong></td><td>Your own recipes calling Genesis directly with your <code>gen_</code> key. Works alongside Exodus in the same folder after the update.</td></tr>
+    <tr><td><strong>All three</strong></td><td>One folder is fine: <code>.env</code> holds <code>EXODUS_API_KEY</code> (Exodus) and <code>GENESIS_API_KEY</code> + <code>ANTHROPIC_API_KEY</code> (your direct calls). They ignore each other's variables.</td></tr>
+  </table>
+  <p><strong>Quick tell — "what am I using right now?"</strong> Look at what you typed. Said "exodus"? You're in Exodus. Said "genesis" or named a bot? That's your own key. Deeper check: <code>npx exodus whoami</code> shows your Exodus brand and account.</p>
+
+  <h2>Your keys — what each one is, what it pays for</h2>
+  <table>
+    <tr><th>Key</th><th>Where it lives</th><th>What it's for</th><th>Billed?</th></tr>
+    <tr><td><code>EXODUS_API_KEY</code></td><td>Project folder <code>.env</code> (installed for you)</td><td>Identifies you + your brand to Exodus</td><td class="free">No per-use charge</td></tr>
+    <tr><td>Genesis key (<code>gen_…</code>)</td><td>You add it: <code>.env</code> as <code>GENESIS_API_KEY</code> (get it from the members area)</td><td>Auth to the Genesis bot server for direct calls</td><td class="free">No per-use charge</td></tr>
+    <tr><td>Anthropic key (<code>sk-ant-…</code>)</td><td><code>.env</code> and/or Exodus Settings → Keys</td><td>The model that runs the bots (direct calls + some Exodus copy runs)</td><td class="billed">Yes — per use</td></tr>
+    <tr><td>OpenRouter key</td><td>Exodus Settings → Keys</td><td>Alternative model provider for Exodus copy runs</td><td class="billed">Yes — per use (OpenRouter <em>or</em> Anthropic per run, never both)</td></tr>
+    <tr><td>KIE key</td><td>Exodus Settings → Keys</td><td>Image + video generation in Exodus</td><td class="billed">Yes — per use</td></tr>
+    <tr><td>OpenAI key</td><td>Your OpenClaw setup</td><td>Memory-search embeddings in OpenClaw only</td><td class="billed">Yes — tiny amounts</td></tr>
+  </table>
+  <p><strong>Bottom line on billing:</strong> the Genesis and Exodus keys are <em>access passes, not meters</em>. What costs money is the AI provider underneath — your Anthropic/OpenRouter key for words, your KIE key for images.</p>
+
+  <h2 class="faq-head">This week's questions, answered</h2>
+  <div class="faq">
+    <h3>Do I paste my Genesis key into Exodus?</h3>
+    <p>No. Never. Exodus linked its own Genesis access to your account by email when you onboarded. There is nothing to install, fix, or debug about Genesis keys inside Exodus. If an Exodus run fails, run <code>npx exodus doctor</code> and follow what it prints.</p>
+
+    <h3>Is the Genesis key for Claude Code different from my OpenClaw key?</h3>
+    <p>Same Genesis account, same kind of key. Your existing key keeps working everywhere you use it. Exodus separately maintains its own access — you don't manage that one.</p>
+
+    <h3>What happens if I reset my Genesis API key?</h3>
+    <p>Resetting your personal key affects the places <em>you</em> pasted it (OpenClaw, your <code>.env</code>, your scripts) — update those with the new key. It does <strong>not</strong> affect Exodus: its access is separate and survives your reset.</p>
+
+    <h3>Can I register the Genesis server as an MCP server in Claude Code?</h3>
+    <p>No — neither product is an MCP server. Genesis direct is a plain HTTPS API (your skills call it with a script); Exodus is a CLI (<code>npx exodus …</code>). If Claude suggests MCP configuration for either, that's a wrong turn.</p>
+
+    <h3>Are the bots hardwired to 700+ word ads?</h3>
+    <p>No. The full ad pipeline targets 700–1500 words because that's Luke's process for long-form DR ads — a design choice, and the editing menu (Shorten / Cut / Simplify) tightens any variant. Calling bots directly, the output is whatever your recipe asks for. Also: these bots are <em>ad writers</em> — DR ads, hooks, headlines from a brief, reel, or swipe. They're not general-purpose writers.</p>
+
+    <h3>Why do Exodus runs take ~12–15 minutes? Is it "sequential"?</h3>
+    <p>The pipeline currently writes variants one after another by design (hooks generate in parallel). That's an Exodus pipeline behavior, not a key limit — a faster parallel version is on the roadmap.</p>
+
+    <h3>Exodus is using "random" product photos.</h3>
+    <p>Not random — product photos from Settings → Brand Info attach only to ad formats whose brand-usage setting allows them ("brandy" formats). Native formats intentionally never use them, because native ads aren't supposed to look like brand ads.</p>
+
+    <h3>Can Exodus swipe a video ad's script?</h3>
+    <p>Today the swipe reliably captures the ad's primary text and headline; video transcripts are best-effort. If you want the video's script modeled, paste the script (or describe the beat) and Exodus uses it as steering. Full video-script swiping is the next build.</p>
+
+    <h3>Do I need a separate brand/folder per product?</h3>
+    <p>Yes, today: one Exodus brand = one folder, by design. The folder is how the CLI knows which brand you're working.</p>
+
+    <h3>Where does Exodus's brand memory live? It's not reading my local files.</h3>
+    <p>Correct — Exodus reads only its own primer, steering, and hook/headline banks (set in the dashboard or via <code>npx exodus primer</code>). Your local brand files belong to your own system. Want a rule applied to Exodus output? Put it in the Exodus primer steering. (A local-files import is on the wishlist.)</p>
+
+    <h3>The skill file mentions files that aren't in my download. Missing?</h3>
+    <p>Nothing's missing — the creative-strategy system builds its workspace as you use it. Primers, bot files, and the bot inventory are <em>created</em> by the skill during onboarding and use, not downloaded.</p>
+  </div>
+
+  <h2>When something breaks</h2>
+  <div class="breaks">
+    <p><strong>1.</strong> <code>npx exodus update</code> — you might be on an old version (old versions also have the old, collide-prone skills).</p>
+    <p><strong>2.</strong> <code>npx exodus doctor</code> — it checks your setup and prints the fix.</p>
+    <p><strong>3.</strong> Still stuck → post in the support channel with the doctor output. Don't let Claude "fix" keys, rotate credentials, or reconfigure servers on a hunch — the most common breakages are a missing update or a wrong folder, not keys.</p>
+  </div>
+</main>
+</body>
+</html>
