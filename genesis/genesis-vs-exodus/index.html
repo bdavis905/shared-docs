@@ -134,21 +134,6 @@
     <h3>Can I register the Genesis server as an MCP server in Claude Code?</h3>
     <p>No — neither product is an MCP server. Genesis direct is a plain HTTPS API (your skills call it with a script); Exodus is a CLI (<code>npx exodus …</code>). If Claude suggests MCP configuration for either, that's a wrong turn.</p>
 
-    <h3>Are the bots hardwired to 700+ word ads?</h3>
-    <p>No. The full ad pipeline targets 700–1500 words because that's Luke's process for long-form DR ads — a design choice, and the editing menu (Shorten / Cut / Simplify) tightens any variant. Calling bots directly, the output is whatever your recipe asks for. Also: these bots are <em>ad writers</em> — DR ads, hooks, headlines from a brief, reel, or swipe. They're not general-purpose writers.</p>
-
-    <h3>Why do Exodus runs take ~12–15 minutes? Is it "sequential"?</h3>
-    <p>The pipeline currently writes variants one after another by design (hooks generate in parallel). That's an Exodus pipeline behavior, not a key limit — a faster parallel version is on the roadmap.</p>
-
-    <h3>Exodus is using "random" product photos.</h3>
-    <p>Not random — product photos from Settings → Brand Info attach only to ad formats whose brand-usage setting allows them ("brandy" formats). Native formats intentionally never use them, because native ads aren't supposed to look like brand ads.</p>
-
-    <h3>Can Exodus swipe a video ad's script?</h3>
-    <p>Today the swipe reliably captures the ad's primary text and headline; video transcripts are best-effort. If you want the video's script modeled, paste the script (or describe the beat) and Exodus uses it as steering. Full video-script swiping is the next build.</p>
-
-    <h3>Do I need a separate brand/folder per product?</h3>
-    <p>Yes, today: one Exodus brand = one folder, by design. The folder is how the CLI knows which brand you're working.</p>
-
     <h3>Where does Exodus's brand memory live? It's not reading my local files.</h3>
     <p>Correct — Exodus reads only its own primer, steering, and hook/headline banks (set in the dashboard or via <code>npx exodus primer</code>). Your local brand files belong to your own system. Want a rule applied to Exodus output? Put it in the Exodus primer steering. (A local-files import is on the wishlist.)</p>
 
