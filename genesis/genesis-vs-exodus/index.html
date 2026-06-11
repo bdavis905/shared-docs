@@ -95,7 +95,7 @@
   <p>Every Exodus skill is now namespaced (<code>exodus-genesis</code>, <code>exodus-write</code>, <code>exodus-image</code>…) plus one front door simply called <code>exodus</code>. Two rules to remember:</p>
   <div class="rules">
     <p>🚂 <strong>Say "exodus" to use Exodus.</strong> "Exodus, write me some ads." "Use exodus to make images." "Exodus, swipe this ad." Claude routes it to the right pipeline.</p>
-    <p>🔑 <strong>Say "genesis" to use your own bots.</strong> The word "genesis" by itself now always means <em>your</em> Genesis API key and <em>your</em> recipes — Exodus will not grab the request.</p>
+    <p>🔑 <strong>Say "genesis" to use the Genesis bots directly</strong> (not through Exodus). The word "genesis" by itself always means a direct call with your Genesis API key and your recipes — Exodus won't grab the request.</p>
   </div>
   <p>If you don't say "exodus," Exodus stays out of your way — your workshop skills and custom recipes run untouched in the same folder.</p>
   <p class="note">Heads-up: saying "genesis" works when <em>your</em> setup is present — your <code>gen_</code> key from the members area saved as <code>GENESIS_API_KEY</code> in the folder's <code>.env</code>, plus your skills/recipes. Exodus does not install that key for you (its own Genesis access lives server-side, tied to your account). Auto-installing your key into the folder is on the roadmap.</p>
