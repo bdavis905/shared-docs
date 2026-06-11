@@ -1,24 +1,10 @@
-# The Exodus Copy Pipeline — As It Works Today
+# The Exodus Copy Pipeline 
 
-**Written:** June 10, 2026 · traced directly from the live code in this repo (viral-ad-dashboard).
-**Audience:** Luke. Plain language first, technical references second. Code snippets live in the Appendix at the very bottom — you can ignore them entirely.
-**Purpose:** A complete map of the current copy flow so you can mark where to insert human-intervention points and where to split it into separate pipelines.
-
-**One naming correction up front.** The bot names we use in conversation don't all match the real system names:
-
-| What we call it | What the system actually calls it |
-|---|---|
-| new-hook-bot | `ad-hook-bot-1` (the Mario-voice hook bot) |
-| mario-bot | `mariobot` |
-| in-feed-vsl-bot | `in-feed-vsl-bot` (this one matches) |
-| headline-bot | **does not exist as a separate bot** — headlines are written by the same bot that wrote the body copy, as a third message in the same conversation |
-
-There is also a fourth bot, `edit-pass`, used only for the after-the-fact editing menu (Shorten / Simplify / Make Better, etc.) — it is not part of the automatic run.
 
 **Five terms, defined once:**
 - **Convex** — the app's database and backend. Holds runs, ideas, brands, everything.
 - **Trigger.dev** — the job-runner in the cloud. When a run starts, a Trigger.dev "task" (a script we wrote) does the actual work step by step.
-- **Genesis server** — Luke's bot server at gas.copycoders.ai. It holds the bots' system prompts (their personalities and instructions). **The prompts are NOT in this repo** — this repo only sends the bots their *inputs* (primer, brief, instructions).
+- **Genesis server** — bot server at gas.copycoders.ai. It holds the bots' system prompts (their personalities and instructions). **The prompts are NOT in this repo** — this repo only sends the bots their *inputs* (primer, brief, instructions).
 - **Primer** — the brand-foundation document (winning ads + brand facts) that gets fed to a bot before it writes anything.
 - **Claude Code (local)** — the AI assistant running on the customer's own machine. It reads "skill" instruction files and runs the `exodus` command-line tool.
 
@@ -31,7 +17,7 @@ This is the default run: a brief goes in, 2 ad variants come out in a Google Doc
 ```
 WHERE THE WORK HAPPENS:        [Local]   = Claude Code on the customer's machine
                                [Cloud]   = Trigger.dev script
-                               [Bot]     = a Genesis bot on Luke's server
+                               [Bot]     = a Genesis bot on server
                                [DB]      = Convex backend
 
  1. [Local] Customer asks for ads (gives an idea, a reel, a swipe, or a brief)
